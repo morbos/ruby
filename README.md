@@ -10,16 +10,27 @@ the reference code and then the translation, this then offers a
 structured avenue to perform diffs. The results look like this:
 
 set pagination off
+
 set logging file DAC1.log
+
 set logging on
+
 x/256x 0x40007400
+
 set logging off
+
 set logging file DMA1.log
+
 set logging on
+
 x/256x 0x40020000
+
 set logging off
+
 set logging file DMA2.log
+
 set logging on
+
 x/256x 0x40020400
 
 etc
