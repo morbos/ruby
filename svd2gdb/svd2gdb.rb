@@ -19,6 +19,7 @@ $options[:emitbigblocks] = false
 $options[:svd] = ""
 $options[:output] = ""
 $options[:skiplist] = []
+$options[:sizelim] = 8192
 
 OptionParser.new do |opts|
   opts.banner = "Usage: svd2gdb.rb [$options]"
@@ -30,7 +31,7 @@ OptionParser.new do |opts|
     $options[:verbose] = true
   end
 
-  opts.on("-B", "--emitbigblocks", 'emit blocks > 4k no matter the cost in time.') do
+  opts.on("-B", "--emitbigblocks", 'emit blocks > sizelimit no matter the cost in time.') do
     $options[:emitbigblocks] = true
   end
   
@@ -45,7 +46,10 @@ OptionParser.new do |opts|
   opts.on("-o", "--output=OUTPUTFILENAME", 'output') do |x|
     $options[:output] = x
   end
-  
+
+  opts.on("-L", "--sizelimit=<decnum>", 'decnum default is 8192') do |x|
+    $options[:sizelim] = x.to_i
+  end
   
   opts.on_tail("-h", "--help", 'this list') do 
     puts opts
@@ -91,8 +95,8 @@ per.each do |x|
   bsize = x.xpath('addressBlock/size');
   if bsize[0] then
     asize = bsize.text.scanf "%x"
-    if (asize[0] > 8192) && !$options[:emitbigblocks] then
-      printf "Skipping block %s for size >8k %d (use -B if needed)\n", name.text, asize[0]
+    if (asize[0] > $options[:sizelim]) && !$options[:emitbigblocks] then
+      printf "Skipping block %s for size > lim %d got %d (use -B if needed)\n", name.text, $options[:sizelim],asize[0]
       next  # Skip this one
     end
     psize = ((asize[0] + 3) / 4)     # 4 bytes per x/x read
