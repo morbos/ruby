@@ -19,6 +19,7 @@ $options[:emitbigblocks] = false
 $options[:svd] = ""
 $options[:output] = ""
 $options[:skiplist] = []
+$options[:onlylist] = []
 $options[:sizelim] = 8192
 
 OptionParser.new do |opts|
@@ -41,6 +42,10 @@ OptionParser.new do |opts|
 
   opts.on("-x", "--skiplist=COMMALIST", 'comma separated list of unwanted modules') do |x|
     $options[:skiplist] = x
+  end
+
+  opts.on("-O", "--onlylist=COMMALIST", 'comma separated list of only wanted modules') do |x|
+    $options[:onlylist] = x
   end
   
   opts.on("-o", "--output=OUTPUTFILENAME", 'output') do |x|
@@ -67,10 +72,19 @@ if $options[:output] == ""
   exit
 end
 
-skiplist = Hash.new
+skiplist = nil
 if $options[:skiplist] != [] then
+  skiplist = Hash.new
   $options[:skiplist].split(',').each do |x|
     skiplist[x.upcase] = true
+  end
+end
+
+onlylist = nil
+if $options[:onlylist] != [] then
+  onlylist = Hash.new
+  $options[:onlylist].split(',').each do |x|
+    onlylist[x.upcase] = true
   end
 end
 
@@ -79,7 +93,7 @@ doc=File.open($options[:svd]) { |f| Nokogiri::XML(f) }
 per =  doc.xpath("//peripheral")
 
 fout = File.open($options[:output], "w")
-if !fout then
+if not fout then
   printf "Error opening %s for output", $options[:output]
   exit
 end
@@ -88,14 +102,17 @@ fout.syswrite("set pagination off\n")
 
 per.each do |x|
   name = x.xpath('name')
-  if skiplist[name.text.upcase] then # user did not want this in the dump
+  if skiplist && skiplist[name.text.upcase] then # user did not want this in the dump
+    next
+  end
+  if onlylist && (not onlylist[name.text.upcase]) then # user wants specific peripherals
     next
   end
   ba = x.xpath('baseAddress')
   bsize = x.xpath('addressBlock/size');
   if bsize[0] then
     asize = bsize.text.scanf "%x"
-    if (asize[0] > $options[:sizelim]) && !$options[:emitbigblocks] then
+    if (asize[0] > $options[:sizelim]) && (not $options[:emitbigblocks]) then
       printf "Skipping block %s for size > lim %d got %d (use -B if needed)\n", name.text, $options[:sizelim],asize[0]
       next  # Skip this one
     end
@@ -106,11 +123,11 @@ per.each do |x|
 
   fout.syswrite(sprintf "set logging file %s.log\n",name.text)
   fout.syswrite("set logging on\n")
-  if !$options[:verbose] then
+  if not $options[:verbose] then
     fout.syswrite("set logging redirect on\n")
   end
   fout.syswrite(sprintf "x/%sx %s\n",psize,ba.text)
-  if !$options[:verbose] then
+  if not $options[:verbose] then
     fout.syswrite("set logging redirect off\n")
   end
   fout.syswrite("set logging off\n")
