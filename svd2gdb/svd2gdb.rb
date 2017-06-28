@@ -99,6 +99,7 @@ if not fout then
 end
 
 fout.syswrite("set pagination off\n")
+fout.syswrite("set logging overwrite on\n")
 
 per.each do |x|
   name = x.xpath('name')
@@ -132,6 +133,8 @@ per.each do |x|
   end
   fout.syswrite("set logging off\n")
 end
+fout.syswrite("set logging overwrite off\n")
+
 fout.close()
 
 

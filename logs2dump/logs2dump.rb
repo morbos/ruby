@@ -9,9 +9,6 @@ ARGV << '-h' if ARGV.empty?
 # given an XML .svd file as input and the path to the dir that
 # contains log files emitted by gdb via the svd2gdb.rb script
 # generator
-# through the hierarchy producing a GDB script file.
-# This script is of a form that will dump the regs for
-# your arch so you can do a before/after register triage.
 #
 
 def slurp(f, contents)
