@@ -145,14 +145,6 @@ per.each do |x|
   if onlylist && (not onlylist[name.text.upcase]) then # user wants specific peripherals
     next
   end
-  ba = x.xpath('baseAddress')
-  bsize = x.xpath('addressBlock/size');
-  if bsize[0] then
-    asize = bsize.text.to_i(16)    
-    psize = ((asize[0] + 3) / 4)     # 4 bytes per x/x read
-  else
-    psize = 256
-  end
 
   f = File.open(name.text + ".log", "r");
   a = Array.new
