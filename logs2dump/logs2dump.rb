@@ -39,9 +39,13 @@ def regfieldwalk(x, r, a, o)
   fblock = r.xpath('fields/field');
   fblock.each do |f|
     fname = f.xpath('name').text
-    print pname+"."+rname+"."+fname+": "
     bitoff = f.xpath('bitOffset').text.to_i
     bitWid = f.xpath('bitWidth').text.to_i
+    if bitWid > 1 then
+      printf "%s.%s.%s[%d:0]: ", pname, rname, fname, bitWid-1
+    else
+      printf "%s.%s.%s: ", pname, rname, fname
+    end
     cell = o/4
     res = rd(a[cell],bitoff,bitWid)
     if not $options[:dec] then
