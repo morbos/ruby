@@ -120,3 +120,9 @@ ADC.CR.ADDIS: 0
 ADC.CR.ADEN: 1
 
 etc
+
+4) Motion.rb
+Using a Raspberry Pi + Noir cam (a 2 or 3 work well). Save video
+around a signal from an Adafruit PiR sensor.
+
+See www.hrroi.com for info on this
