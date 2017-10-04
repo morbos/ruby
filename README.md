@@ -125,4 +125,4 @@ etc
 Using a Raspberry Pi + Noir cam (a 2 or 3 work well). Save video
 around a signal from an Adafruit PiR sensor.
 
-See www.hrroi.com for info on this
+See www.hrrzi.com for info on this
