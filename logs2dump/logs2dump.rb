@@ -33,8 +33,12 @@ def rd(v, off, wid)
   mask = (1 << wid) - 1
   return (v >> off) & mask
 end
-def regfieldwalk(x, r, a, o)
-  pname = x.xpath('name').text
+def regfieldwalk(x, r, a, o, override)
+  if override != nil
+    pname = override
+  else
+    pname = x.xpath('name').text
+  end
   rname = r.xpath('name').text
   fblock = r.xpath('fields/field');
   fblock.each do |f|
@@ -53,19 +57,19 @@ def regfieldwalk(x, r, a, o)
         print "0x"
       end
       puts res.to_s(16)
-    else 
+    else
       puts res
     end
   end
 end
 
-def regwalk(x, a)
+def regwalk(x, a, override)
   rblock = x.xpath('registers/register');
   rblock.each do |r|
     reg = r.xpath('name')
     off = r.xpath('addressOffset')
     offset = off.text.to_i(16)
-    regfieldwalk(x,r,a,offset)
+    regfieldwalk(x, r, a, offset, override)
   end
 end
 
@@ -82,7 +86,7 @@ OptionParser.new do |opts|
   opts.on("-l", "--list", 'List sheets') do
     $options[:list] = true
   end
-  
+
   opts.on("-s", "--svdfile=SVDFILENAME", 'svd input') do |x|
     $options[:svd] = x
   end
@@ -102,8 +106,8 @@ OptionParser.new do |opts|
   opts.on("-D", "--dec", 'dump is dec') do
     $options[:dec] = true
   end
-  
-  opts.on_tail("-h", "--help", 'this list') do 
+
+  opts.on_tail("-h", "--help", 'this list') do
     puts opts
     exit
   end
@@ -137,13 +141,32 @@ per =  doc.xpath("//peripheral")
 curr = Dir.pwd
 Dir.chdir($options[:logdir])
 
+# 2 pass now.
+# pass 1 add all periph's to a hash keyed by name
+spot = Hash.new
 per.each do |x|
   name = x.xpath('name')
+  spot[name.text] = x
+end
+
+# pass 2 if the periph is 'derivedFrom' pull its defn from the hash setup
+# in pass 1.
+per.each do |x|
+  name = x.xpath('name')
+
   if skiplist && skiplist[name.text.upcase] then # user did not want this in the dump
     next
   end
   if onlylist && (not onlylist[name.text.upcase]) then # user wants specific peripherals
     next
+  end
+
+  e = x.attributes['derivedFrom']
+  if e != nil
+    x = spot[e.value]
+    override = name.text
+  else
+    override = nil
   end
 
   f = File.open(name.text + ".log", "r");
@@ -152,7 +175,7 @@ per.each do |x|
     slurp(f,a) # get the contents
     # now we have the contents for this periph
     # we walk the registers in the perip
-    regwalk(x, a)
+    regwalk(x, a, override)
     f.close
   else
     p "cannot open" + name.text + ".log"
