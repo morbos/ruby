@@ -124,5 +124,11 @@ etc
 4) Motion.rb
 Using a Raspberry Pi + Noir cam (a 2 or 3 work well). Save video
 around a signal from an Adafruit PiR sensor.
-
 See www.hrrzi.com for info on this
+
+5) analyze.rb
+A special tool to analyze log data from SensorTiles. Packets going
+over to the BLE chip are marked 0xAA. Replies via ISR are marked
+0xBB. The raw data is logged and then dumped to a file for analysis by
+this tool.
+

@@ -35,7 +35,7 @@ OptionParser.new do |opts|
   opts.on("-B", "--emitbigblocks", 'emit blocks > sizelimit no matter the cost in time.') do
     $options[:emitbigblocks] = true
   end
-  
+
   opts.on("-s", "--svdfile=SVDFILENAME", 'svd input') do |x|
     $options[:svd] = x
   end
@@ -47,7 +47,7 @@ OptionParser.new do |opts|
   opts.on("-O", "--onlylist=COMMALIST", 'comma separated list of only wanted modules') do |x|
     $options[:onlylist] = x
   end
-  
+
   opts.on("-o", "--output=OUTPUTFILENAME", 'output') do |x|
     $options[:output] = x
   end
@@ -55,8 +55,8 @@ OptionParser.new do |opts|
   opts.on("-L", "--sizelimit=<decnum>", 'decnum default is 8192') do |x|
     $options[:sizelim] = x.to_i
   end
-  
-  opts.on_tail("-h", "--help", 'this list') do 
+
+  opts.on_tail("-h", "--help", 'this list') do
     puts opts
     exit
   end
@@ -123,37 +123,16 @@ per.each do |x|
   end
 
   fout.syswrite(sprintf "set logging file %s.log\n",name.text)
-  fout.syswrite("set logging on\n")
   if not $options[:verbose] then
     fout.syswrite("set logging redirect on\n")
   end
+  fout.syswrite("set logging on\n")
   fout.syswrite(sprintf "x/%sx %s\n",psize,ba.text)
+  fout.syswrite("set logging off\n")
   if not $options[:verbose] then
     fout.syswrite("set logging redirect off\n")
   end
-  fout.syswrite("set logging off\n")
 end
 fout.syswrite("set logging overwrite off\n")
 
 fout.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
