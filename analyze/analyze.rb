@@ -232,7 +232,38 @@ def EVT_DISCONN_COMPLETE_CODE
 end
 
 def EVT_LE_META_EVENT
-  printf "subevent %02x\n", $pkt[2]
+  printf "subevent %02x\n", $pkt[3]
+  case ($pkt[3])
+  when 2
+    printf "N reports %d\n", $pkt[4]
+    off = 4
+#    rec = [
+#      [:event_type, 1],
+#      [:address_type, 1],
+#      [:address, 6]]
+    for i in 1 .. $pkt[4] do
+      printf "event_type 0x%x address_type 0x%x\n", $pkt[i + off], $pkt[i + off + 1]
+      off += 2
+      for j in 0 .. 5 do
+        printf "%02x%s", $pkt[i + off + j], (j == 5 ? "\n" : ":")
+      end
+      off += 6
+      remainder = $pkt[i + off] # how many to collect
+      off += 1
+      curr = 0
+      while curr < remainder do
+        len = $pkt[i + off]
+        off += 1
+        curr += (len + 1)
+        printf "%02x: ", len
+        for j in 0 .. len-1 do
+          printf "%02x%s", $pkt[i + j + off], (j == (len-1) ? "\n" : " ")
+        end
+        off += len
+      end
+      printf "RSSI %02x\n", $pkt[i + off]
+    end
+  end
 end
 
 def EVT_VENDOR

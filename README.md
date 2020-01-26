@@ -132,3 +132,8 @@ over to the BLE chip are marked 0xAA. Replies via ISR are marked
 0xBB. The raw data is logged and then dumped to a file for analysis by
 this tool.
 
+6) patcher.rb
+Used for my LoRaDa network nodes. Patches a magic# in the ELF32 to
+give a node#. Can be used for other file patches as needed. 32bits
+only currently. 
+
