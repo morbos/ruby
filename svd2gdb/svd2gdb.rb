@@ -100,7 +100,8 @@ end
 
 fout.syswrite("set pagination off\n")
 fout.syswrite("set logging overwrite on\n")
-
+fout.syswrite("set style enabled off\n")
+map = {}
 per.each do |x|
   name = x.xpath('name')
   if skiplist && skiplist[name.text.upcase] then # user did not want this in the dump
@@ -112,6 +113,7 @@ per.each do |x|
   ba = x.xpath('baseAddress')
   bsize = x.xpath('addressBlock/size');
   if bsize[0] then
+    map[name.text] = bsize[0].text
     asize = bsize.text.scanf "%x"
     if (asize[0] > $options[:sizelim]) && (not $options[:emitbigblocks]) then
       printf "Skipping block %s for size > lim %d got %d (use -B if needed)\n", name.text, $options[:sizelim],asize[0]
@@ -119,7 +121,12 @@ per.each do |x|
     end
     psize = ((asize[0] + 3) / 4)     # 4 bytes per x/x read
   else
-    psize = 256
+    df = x.attr('derivedFrom')
+    if df and map[df]
+      psize = map[df].to_i(16)
+    else
+      psize = 256
+    end
   end
 
   fout.syswrite(sprintf "set logging file %s.log\n",name.text)
