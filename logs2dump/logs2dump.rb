@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 require 'optparse'
 require 'nokogiri'
+require 'scanf'
 
 # This vvvv handles the case no arg was provided.
 ARGV << '-h' if ARGV.empty?
@@ -60,12 +61,22 @@ def regfieldwalk(x, r, a, o, override, cname, coff)
       bitWid = f.xpath('bitWidth').text.to_i
 #      p bitoff.text.to_i, bitWid.text.to_i
       if bitoff == 0 and bitWid == 0
-        lsb = f.xpath('lsb').text.to_i
-        msb = f.xpath('msb').text.to_i
-        bitWid = (msb - lsb) + 1
-        bitoff = lsb
+        if f.xpath('lsb').empty? and f.xpath('msb').empty?
+          if f.xpath('bitRange').empty?
+            p "No valid ranges"
+            exit
+          else
+            arr = f.xpath('bitRange').text.scanf "[%d:%d]"
+            bitoff = arr[1]
+            bitWid = (arr[0] - arr[1]) + 1
+          end
+        else
+          lsb = f.xpath('lsb').text.to_i
+          msb = f.xpath('msb').text.to_i
+          bitWid = (msb - lsb) + 1
+          bitoff = lsb
+        end
       end
-#      bitWid = f.xpath('bitWidth').text.to_i
       if rname.include?('[')
         rn = sprintf rname, i.to_s
       else
